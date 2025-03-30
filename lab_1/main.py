@@ -60,14 +60,14 @@ def pikar_forth_3(x):
 
 
 
-def table_print(x, y1, y2, y3, y4, y5, y6):
-    print("---------------------------------------------------------------------------------------------------------")
-    print("|      x      |    Пикар 1   |    Пикар 2   |    Пикар 3   |    Пикар 4   |     Эйлер    | Рунге-Кутта4 |")
-    print("---------------------------------------------------------------------------------------------------------")
+def table_print(x, y1, y2, y3, y4, y5):
+    print("------------------------------------------------------------------------------------------")
+    print("|      x      |    Пикар 1   |    Пикар 2   |    Пикар 3   |    Пикар 4   |     Эйлер    |")
+    print("------------------------------------------------------------------------------------------")
     for i in range(len(x)):
-        print("|{:^14.5f}|{:^14.5f}|{:^14.5f}|{:^14.5f}|{:^14.5f}|{:^14.5f}|{:^14.5f}|".format(
-            x[i], y1[i], y2[i], y3[i], y4[i], y5[i], y6[i]))
-    print("---------------------------------------------------------------------------------------------------------")
+        print("|{:^14.5f}|{:^14.5f}|{:^14.5f}|{:^14.5f}|{:^14.5f}|{:^14.5f}|".format(
+            x[i], y1[i], y2[i], y3[i], y4[i], y5[i]))
+    print("------------------------------------------------------------------------------------------")
 
 def task1():
     x0 = 0
@@ -116,10 +116,9 @@ def task2():
     plt.legend()
     plt.show()
 
-def task3():
+def task3(x_max):
     x0 = 0
-    x_max = 1.707246    # Рунге Кутта 4 порядка
-    # x_max = 1.823675    # Эйлер
+    print("Максимальное значение x_max: ", x_max)
     N = 100
     h = (x_max - x0) / N
     Xvals = []
@@ -128,7 +127,6 @@ def task3():
     Yvals_third = []
     Yvals_forth = []
     Yvals_euler = euler_base(0, 0, h, N, func_3)
-    Yvals_runge_kutta = runge_kutta4(0, 0, h, N, func_3)
     for i in range(N):
         x = x0 + i * h
         Xvals.append(x)
@@ -136,15 +134,31 @@ def task3():
         Yvals_second.append(pikar_second_3(x))
         Yvals_third.append(pikar_third_3(x))
         Yvals_forth.append(pikar_forth_3(x))
-    table_print(Xvals, Yvals_first, Yvals_second, Yvals_third, Yvals_forth, Yvals_euler, Yvals_runge_kutta)
+    table_print(Xvals, Yvals_first, Yvals_second, Yvals_third, Yvals_forth, Yvals_euler)
     plt.plot(Xvals, Yvals_euler, label='Эйлер')
-    plt.plot(Xvals, Yvals_runge_kutta, label='Рунге-Кутта 4')
     plt.plot(Xvals, Yvals_first, label='1 приближение')
     plt.plot(Xvals, Yvals_second, label='2 приближение')
     plt.plot(Xvals, Yvals_third, label='3 приближение')
     plt.plot(Xvals, Yvals_forth, label='4 приближение')
     plt.legend()
     plt.show()
+
+def calc_xmax():
+    lhs, rhs = 0, 2
+    accur = 1e-15
+    prev = lhs
+    cur = (rhs - lhs) / 2
+    while abs(prev - cur) > accur:
+        try:
+            N = 100
+            h = cur / N
+            euler_base(0, 0, h, N, func_3)
+            lhs = cur
+        except OverflowError:
+            rhs = cur
+        prev = cur
+        cur = (rhs + lhs) / 2
+    return lhs
 
 
 while True:
@@ -157,6 +171,6 @@ while True:
     elif action == 2:
         task2()
     elif action == 3:
-        task3()
+        task3(calc_xmax())
     elif action == 0:
         break
