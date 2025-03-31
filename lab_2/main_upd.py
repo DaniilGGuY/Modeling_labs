@@ -4,7 +4,7 @@ from runge import rungeKuttaSystem
 from decimal import Decimal, getcontext
 
 # Установка точности для Decimal
-getcontext().prec = 37
+getcontext().prec = 45
 
 variant = int(input("Введите вариант задания (1-2): "))
 while variant != 1 and variant != 2:
@@ -31,9 +31,6 @@ else:
                   [ Decimal(9000),  Decimal(145.8) ],
                   [ Decimal(10000), Decimal(200)   ] ]
 
-for i in range(len(table_in)):
-    table_in[i][1] *= Decimal(2.0)
-
 table_with_replaces = [[Decimal(m.log(float(measure))) for measure in row] for row in table_in]
 
 R0 = Decimal(0)
@@ -41,7 +38,7 @@ R = Decimal(0.35)
 Tw = Decimal(2000)
 T0 = Decimal(10000)
 p = Decimal(4)
-EPS = Decimal(1e-36)
+EPS = Decimal(1e-4)
 c = Decimal(3 * 10 ** 10)
 
 def calcT(r):
@@ -74,26 +71,28 @@ def sign(val):
     return 1
 
 def shotMethodSolve():
-    n = 100
+    n = 1000
     ksi_l, ksi_r = Decimal(0), Decimal(1)
     u0_l, u0_r = ksi_l * calcPlanca(R0), ksi_r * calcPlanca(R0)
     F0 = Decimal(0)
-
     x_solve, u_l, f_l = rungeKuttaSystem(Decimal(0), u0_l, F0, (R - R0) / n, n, fFunc, phiFunc)
     u_r, f_r = rungeKuttaSystem(Decimal(0), u0_r, F0, (R - R0) / n, n, fFunc, phiFunc)[1:]
     l_sign = sign(calcSecondCond(u_l, f_l))
     r_sign = sign(calcSecondCond(u_r, f_r))
-
     u_solve, f_solve = [], []
     iter = 1
-    while abs((ksi_l - ksi_r) / ((ksi_l + ksi_r) / Decimal(2))) > EPS:
+    while l_sign != r_sign:
         ksi_mid = (ksi_l + ksi_r) / Decimal(2)
         u0_mid = ksi_mid * calcPlanca(Decimal(0))
-        u_solve, f_solve = rungeKuttaSystem(Decimal(0), u0_mid, F0, (R - R0) / n, n, fFunc, phiFunc)[1:]
-        mid_sign = sign(calcSecondCond(u_solve, f_solve))
+        u_mid, f_mid = rungeKuttaSystem(Decimal(0), u0_mid, F0, (R - R0) / n, n, fFunc, phiFunc)[1:]
+        mid_sign = sign(calcSecondCond(u_mid, f_mid))
         print(f'Итерация {iter}; Знак {mid_sign}; значение ksi = {ksi_mid}')
         iter += 1
-        if mid_sign == l_sign:
+        if mid_sign == 0:
+            u_solve = u_mid
+            f_solve = f_mid
+            break
+        elif mid_sign == l_sign:
             ksi_l = ksi_mid
         else:
             ksi_r = ksi_mid
