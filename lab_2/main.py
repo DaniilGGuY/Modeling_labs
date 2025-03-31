@@ -31,9 +31,6 @@ else:
                   [ Decimal(9000),  Decimal(145.8) ],
                   [ Decimal(10000), Decimal(200)   ] ]
 
-for i in range(len(table_in)):
-    table_in[i][1] *= Decimal(2.0)
-
 table_with_replaces = [[Decimal(m.log(float(measure))) for measure in row] for row in table_in]
 
 R0 = Decimal(0)
